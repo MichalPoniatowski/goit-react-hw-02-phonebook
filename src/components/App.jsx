@@ -1,16 +1,105 @@
-export const App = () => {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
-  );
-};
+import { Component } from 'react';
+import { nanoid } from 'nanoid';
+import React from 'react';
+
+import ContactForm from './ContactForm/ContactForm';
+import ContactList from './ContactList/ContactList';
+import Filter from './Filter/Filter';
+
+export class App extends Component {
+  form = React.createRef();
+
+  state = {
+    contacts: [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ],
+    filter: '',
+    name: '',
+    number: '',
+  };
+
+  setStateInput = event => {
+    const type = event.target.name;
+    this.setState({ [type]: event.target.value });
+  };
+
+  onSubmit = event => {
+    event.preventDefault();
+
+    if (!this.form.current.checkValidity()) {
+      console.log('Form is invalid');
+      return;
+    }
+
+    const newContact = {
+      id: nanoid(),
+      name: this.state.name,
+      number: this.state.number,
+    };
+
+    this.setState(
+      prevState => ({
+        contacts: [...prevState.contacts, newContact],
+        name: '',
+        number: '',
+      }),
+      () => {
+        console.log(this.state);
+      }
+    );
+  };
+
+  deleteContact = idToDelete => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== idToDelete),
+    }));
+  };
+
+  listContacts = () => {
+    const filterLowercased = this.state.filter.toLowerCase();
+    return this.state.contacts
+      .filter(contact => contact.name.toLowerCase().includes(filterLowercased))
+      .map((contact, id) => {
+        return (
+          <li key={contact.id}>
+            {contact.name}: {contact.number}
+            <button onClick={() => this.deleteContact(contact.id)}>
+              delete
+            </button>
+          </li>
+        );
+      });
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>Phonebook</h1>
+
+        <div>
+          <ContactForm
+            submit={this.onSubmit}
+            handleInput={this.setStateInput}
+            references={this.form}
+          />
+        </div>
+
+        <div>
+          <span>Filter</span>
+          <h2>Contacts</h2>
+          <span>Find contacts by name</span>
+          <Filter
+            value={this.state.filter}
+            handleInput={this.setStateInput}
+          ></Filter>
+        </div>
+        <ContactList list={this.listContacts()}></ContactList>
+      </div>
+    );
+  }
+}
+
+export default App;
