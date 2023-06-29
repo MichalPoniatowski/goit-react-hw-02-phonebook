@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { nanoid } from 'nanoid';
 import React from 'react';
+import './App.css';
 
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
@@ -17,40 +18,40 @@ export class App extends Component {
       { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
     ],
     filter: '',
-    name: '',
-    number: '',
   };
 
-  setStateInput = event => {
-    const type = event.target.name;
-    this.setState({ [type]: event.target.value });
-  };
+  // FUNKCJA DO OBSŁUGI INPUTA W ZALEŻNOŚCI OD NAME NA KTÓYM WYWOŁANA
 
-  onSubmit = event => {
+  addNewContact = event => {
     event.preventDefault();
 
-    if (!this.form.current.checkValidity()) {
-      console.log('Form is invalid');
-      return;
-    }
+    // TWORZENIE NOWEGO KONTAKTU
 
     const newContact = {
       id: nanoid(),
-      name: this.state.name,
-      number: this.state.number,
+      name: event.target.elements.name.value,
+      number: event.target.elements.number.value,
     };
 
-    this.setState(
-      prevState => ({
+    // SPRAWDZENIE CZY KONTAKT JUŻ ISTNIEJE
+
+    if (
+      this.state.contacts.some(
+        contact =>
+          contact.name.toLowerCase() === newContact.name.toLowerCase() ||
+          contact.number.toLowerCase() === newContact.number.toLowerCase()
+      )
+    ) {
+      alert(`${newContact.name} already in contacts`);
+    } else {
+      this.setState(prevState => ({
         contacts: [...prevState.contacts, newContact],
-        name: '',
-        number: '',
-      }),
-      () => {
-        console.log(this.state);
-      }
-    );
+      }));
+      event.target.reset();
+    }
   };
+
+  // USUWANIE KONTAKTU
 
   deleteContact = idToDelete => {
     this.setState(prevState => ({
@@ -58,45 +59,46 @@ export class App extends Component {
     }));
   };
 
-  listContacts = () => {
-    const filterLowercased = this.state.filter.toLowerCase();
-    return this.state.contacts
-      .filter(contact => contact.name.toLowerCase().includes(filterLowercased))
-      .map((contact, id) => {
-        return (
-          <li key={contact.id}>
-            {contact.name}: {contact.number}
-            <button onClick={() => this.deleteContact(contact.id)}>
-              delete
-            </button>
-          </li>
-        );
-      });
+  // WYŚWIETLANIE KONTAKTÓW
+
+  setStateInput = event => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
+
+  filterContacts = event => {
+    this.setState({
+      filter: event.target.value,
+    });
+  };
+
+  renderContacts = () => {
+    const { filter, contacts } = this.state;
+    const filteredContacts = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    return filteredContacts.map(contact => (
+      <li key={contact.id}>
+        {contact.name}: {contact.number}
+        <button onClick={() => this.deleteContact(contact.id)}>delete</button>
+      </li>
+    ));
   };
 
   render() {
     return (
-      <div>
-        <h1>Phonebook</h1>
-
-        <div>
-          <ContactForm
-            submit={this.onSubmit}
-            handleInput={this.setStateInput}
-            references={this.form}
-          />
-        </div>
-
-        <div>
-          <span>Filter</span>
-          <h2>Contacts</h2>
-          <span>Find contacts by name</span>
+      <div className="wrapper">
+        <ContactForm
+          submit={this.addNewContact}
+          contacts={this.state.contacts}
+        />
+        <ContactList list={this.renderContacts()}>
           <Filter
-            value={this.state.filter}
-            handleInput={this.setStateInput}
-          ></Filter>
-        </div>
-        <ContactList list={this.listContacts()}></ContactList>
+            filteredContacts={this.filterContacts}
+            // handleInput={this.setStateInput}
+          />
+        </ContactList>
       </div>
     );
   }
