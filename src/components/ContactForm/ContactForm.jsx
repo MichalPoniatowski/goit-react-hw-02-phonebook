@@ -10,7 +10,7 @@ const ContactForm = ({ submit, contacts }) => {
         <input
           type="text"
           name="name"
-          pattern="^[a-zA-Z]{2,}( [a-zA-Z]{2,})?$"
+          pattern="^[a-zA-Z]+( [a-zA-Z]+)?$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
           required
           value={name}
@@ -20,7 +20,7 @@ const ContactForm = ({ submit, contacts }) => {
         <input
           type="tel"
           name="number"
-          pattern="^\d{2,3}[-\s]?\d{2,3}[-\s]?\d{2,3}$"
+          pattern="^\d{1,3}([- ]?\d{1,3}){2,3}$"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
           value={number}
