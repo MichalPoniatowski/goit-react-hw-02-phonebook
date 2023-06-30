@@ -27,11 +27,34 @@ export class App extends Component {
 
     // TWORZENIE NOWEGO KONTAKTU
 
+    const nameValue = event.target.elements.name.value;
+    const numberValue = event.target.elements.number.value;
+    const namePattern = new RegExp(event.target.elements.name.pattern);
+    const numberPattern = new RegExp(event.target.elements.number.pattern);
+
     const newContact = {
       id: nanoid(),
       name: event.target.elements.name.value,
       number: event.target.elements.number.value,
     };
+
+    const isNameValid = namePattern.test(nameValue);
+    const isNumberValid = numberPattern.test(numberValue);
+
+    let errorMessage = '';
+
+    if (!isNameValid) {
+      errorMessage += 'Invalid name input. ';
+    }
+
+    if (!isNumberValid) {
+      errorMessage += 'Invalid number input.';
+    }
+
+    if (errorMessage) {
+      alert(errorMessage);
+      return;
+    }
 
     // SPRAWDZENIE CZY KONTAKT JUŻ ISTNIEJE
 
